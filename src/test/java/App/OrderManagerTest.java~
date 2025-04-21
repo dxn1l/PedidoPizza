@@ -1,0 +1,45 @@
+package App;
+
+import app.OrderManager;
+import app.PaymentProcessor;
+import db.DataBaseManager;
+
+class OrderManagerTest {
+    DataBaseManager db;
+    PaymentProcessor payment;
+    OrderManager manager;
+
+    @BeforeEach
+    void setup() {
+        db = mock(DataBaseManager.class);
+        payment = mock(PaymentProcessor.class);
+        manager = new OrderManager(db, payment);
+    }
+
+    @Test
+    void crearPedidoLlamaADatabase() {
+        Pedido pedido = new Pedido("Pedro", "Pepperoni ($7.49)", 7.49);
+        manager.crearPedido(pedido);
+        verify(db).crearPedido("Pedro", "Pepperoni ($7.49)", 7.49);
+    }
+
+    @Test
+    void pagarConExitoRegistraYPaga() {
+        Pedido pedido = new Pedido(1, "Laura", "Hawaiana ($7.99)", 7.99);
+        when(payment.procesarPago(pedido)).thenReturn(true);
+
+        manager.pagar(pedido);
+        verify(db).registrarPago(pedido);
+        verify(db).eliminarPedido(1);
+    }
+
+    @Test
+    void pagarFallaNoRegistraNiElimina() {
+        Pedido pedido = new Pedido(2, "Mario", "Vegetariana ($6.75)", 6.75);
+        when(payment.procesarPago(pedido)).thenReturn(false);
+
+        manager.pagar(pedido);
+        verify(db, never()).registrarPago(pedido);
+        verify(db, never()).eliminarPedido(2);
+    }
+}
