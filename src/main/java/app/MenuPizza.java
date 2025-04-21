@@ -1,0 +1,138 @@
+package app;
+
+import java.util.*;
+
+public class MenuPizza {
+
+    private static final Map<Integer, String> opcionesPizza = new LinkedHashMap<>();
+    private static final Map<Integer, Double> preciosPizza = new HashMap<>();
+
+    static {
+        opcionesPizza.put(1, "Margarita");
+        opcionesPizza.put(2, "Pepperoni");
+        opcionesPizza.put(3, "Hawaiana");
+        opcionesPizza.put(4, "Cuatro Quesos");
+        opcionesPizza.put(5, "Barbacoa");
+        opcionesPizza.put(6, "Vegetariana");
+        opcionesPizza.put(7, "Mexicana");
+        opcionesPizza.put(8, "Pollo y Champiñones");
+        opcionesPizza.put(9, "Carbonara");
+        opcionesPizza.put(10, "Mariscos");
+
+        preciosPizza.put(1, 6.99);
+        preciosPizza.put(2, 7.49);
+        preciosPizza.put(3, 7.99);
+        preciosPizza.put(4, 8.25);
+        preciosPizza.put(5, 8.50);
+        preciosPizza.put(6, 6.75);
+        preciosPizza.put(7, 8.00);
+        preciosPizza.put(8, 7.80);
+        preciosPizza.put(9, 8.30);
+        preciosPizza.put(10, 9.00);
+    }
+
+    public static Pedido armarPedidoDesdeMenu(Scanner scanner, String cliente) {
+        List<String> itemsSeleccionados = new ArrayList<>();
+        double total = 0.0;
+
+        while (true) {
+            mostrarMenu();
+            System.out.print("Elige una pizza (1-10): ");
+            int opcion = Integer.parseInt(scanner.nextLine());
+
+            if (opcionesPizza.containsKey(opcion)) {
+                String pizza = opcionesPizza.get(opcion);
+                double precio = preciosPizza.get(opcion);
+                itemsSeleccionados.add(pizza + " ($" + precio + ")");
+                total += precio;
+                System.out.println("✅ Añadido: " + pizza + " - Total actual: $" + total);
+            } else {
+                System.out.println("❌ Opción inválida.");
+            }
+
+            System.out.print("¿Deseas añadir otra pizza? (s/n): ");
+            String seguir = scanner.nextLine();
+            if (!seguir.equalsIgnoreCase("s")) {
+                break;
+            }
+        }
+
+        String itemsTexto = String.join(", ", itemsSeleccionados);
+        return new Pedido(cliente, itemsTexto, total);
+    }
+
+    private static void mostrarMenu() {
+        System.out.println("📋 Menú de Pizzas:");
+        for (Map.Entry<Integer, String> entry : opcionesPizza.entrySet()) {
+            System.out.printf("%d. %s - $%.2f%n", entry.getKey(), entry.getValue(), preciosPizza.get(entry.getKey()));
+        }
+    }
+
+    public static Pedido editarPedidoExistente(Scanner scanner, int id, String cliente, String itemsExistentes, double totalActual) {
+        List<String> items = new ArrayList<>(Arrays.asList(itemsExistentes.split(", ")));
+        double total = totalActual;
+
+        while (true) {
+            System.out.println("\n🛠 ¿Qué deseas hacer con el Pedido #" + id + "?");
+            System.out.println("1. Añadir pizza");
+            System.out.println("2. Eliminar pizza");
+            System.out.println("3. Finalizar edición");
+            System.out.println("Actual: " + items + " | Total: $" + total);
+            System.out.print("Opción: ");
+            int opcion = Integer.parseInt(scanner.nextLine());
+
+            switch (opcion) {
+                case 1 -> {
+                    mostrarMenu();
+                    System.out.print("Elige una pizza (1-10): ");
+                    int seleccion = Integer.parseInt(scanner.nextLine());
+                    if (opcionesPizza.containsKey(seleccion)) {
+                        String nombre = opcionesPizza.get(seleccion);
+                        double precio = preciosPizza.get(seleccion);
+                        items.add(nombre + " ($" + precio + ")");
+                        total += precio;
+                        System.out.println("✅ Añadido: " + nombre);
+                    } else {
+                        System.out.println("❌ Opción inválida.");
+                    }
+                }
+                case 2 -> {
+                    if (items.isEmpty()) {
+                        System.out.println("⚠️ No hay pizzas que eliminar.");
+                        break;
+                    }
+                    System.out.println("📦 Pizzas actuales:");
+                    for (int i = 0; i < items.size(); i++) {
+                        System.out.println((i + 1) + ". " + items.get(i));
+                    }
+                    System.out.print("¿Cuál deseas eliminar? (número): ");
+                    int idx = Integer.parseInt(scanner.nextLine()) - 1;
+                    if (idx >= 0 && idx < items.size()) {
+                        String eliminada = items.remove(idx);
+                        double precio = extraerPrecio(eliminada);
+                        total -= precio;
+                        System.out.println("🗑️ Eliminada: " + eliminada);
+                    } else {
+                        System.out.println("❌ Selección inválida.");
+                    }
+                }
+                case 3 -> {
+                    String nuevoItems = String.join(", ", items);
+                    return new Pedido(id, cliente, nuevoItems, total);
+                }
+                default -> System.out.println("❌ Opción no válida.");
+            }
+        }
+    }
+
+    private static double extraerPrecio(String itemConPrecio) {
+        try {
+            int ini = itemConPrecio.indexOf("($") + 2;
+            int fin = itemConPrecio.indexOf(")", ini);
+            return Double.parseDouble(itemConPrecio.substring(ini, fin));
+        } catch (Exception e) {
+            return 0.0;
+        }
+    }
+
+}
