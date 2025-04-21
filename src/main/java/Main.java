@@ -68,15 +68,24 @@ public class Main {
                     orderManager.eliminarPedido(id);
                 }
                 case 5 -> {
-                    System.out.print("Cliente: ");
-                    String cliente = scanner.nextLine();
-                    System.out.print("Items: ");
-                    String items = scanner.nextLine();
-                    System.out.print("Total: ");
-                    double total = Double.parseDouble(scanner.nextLine());
-                    Pedido pedido = new Pedido(cliente, items, total);
+                    System.out.print("ID :");
+                    int id = Integer.parseInt(scanner.nextLine());
+
+                    Pedido pedido = orderManager.obtenerPedido(id);
+                    if (pedido == null) return;
+
+                    orderManager.mostrarPedido(id);
+
+                    System.out.print("¿Deseas continuar con el pago? (s/n): ");
+                    String confirmacion = scanner.nextLine();
+                    if (!confirmacion.equalsIgnoreCase("s")) {
+                        System.out.println("❌ Pago cancelado.");
+                        return;
+                    }
+
                     orderManager.pagar(pedido);
                 }
+
                 case 0 -> {
                     System.out.println("👋 Cerrando sistema...");
                     return;

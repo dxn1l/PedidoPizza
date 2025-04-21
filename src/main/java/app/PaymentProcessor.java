@@ -1,9 +1,94 @@
 package app;
 
+import java.util.Random;
+import java.util.Scanner;
+
 public class PaymentProcessor {
-    public boolean procesarPago(Pedido pedido) {
-        // Simulación de pago
-        System.out.println("💳 Procesando pago de $" + pedido.getTotal() + " para " + pedido.getCliente());
-        return true; // Simulamos éxito
+      public boolean procesarPago(Pedido pedido) {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("💰 Total a pagar: \u001B[32m$" + pedido.getTotal() + "\u001B[0m");
+        System.out.println("Seleccione método de pago:");
+        System.out.println("1. Tarjeta de crédito");
+        System.out.println("2. Efectivo");
+        System.out.println("3. Código promocional");
+        System.out.print("Opción: ");
+        int metodo = Integer.parseInt(scanner.nextLine());
+
+        switch (metodo) {
+            case 1 -> {
+                System.out.print("Ingrese número de tarjeta (16 dígitos): ");
+                String tarjeta = scanner.nextLine();
+                if (!tarjeta.matches("\\d{16}")) {
+                    System.out.println("❌ Tarjeta inválida.");
+                    return false;
+                }
+                System.out.print("Ingrese código de seguridad (CVV): ");
+                String cvv = scanner.nextLine();
+                if (!cvv.matches("\\d{3}")) {
+                    System.out.println("❌ CVV inválido.");
+                    return false;
+                }
+                System.out.print("Confirmar pago con tarjeta (s/n): ");
+                String confirmar = scanner.nextLine();
+                if (!confirmar.equalsIgnoreCase("s")) return false;
+                System.out.println("💳 Procesando pago...");
+                // Simulación de validación...
+                esperar();
+                return true;
+            }
+            case 2 -> {
+                System.out.print("¿Confirmas que pagarás en efectivo al recibir? (s/n): ");
+                String confirmar = scanner.nextLine();
+                if (!confirmar.equalsIgnoreCase("s")) return false;
+                System.out.println("🧾 Pedido marcado para pago en efectivo.");
+                return true;
+            }
+            case 3 -> {
+
+                if (jugarMiniJuegoPromocional(scanner)) {
+                    System.out.println("🎉 ¡Código desbloqueado! Se aplicará el descuento.");
+
+                    return true;
+                } else {
+                    System.out.println("❌ No lograste desbloquear el código promocional.");
+                    return false;
+                }
+            }
+            default -> {
+                System.out.println("❌ Método inválido.");
+                return false;
+            }
+        }
+    }
+
+    private boolean jugarMiniJuegoPromocional(Scanner scanner) {
+        Random random = new Random();
+        int numeroSecreto = random.nextInt(5) + 1; // Número entre 1 y 5
+        int intentos = 3;
+
+        System.out.println("🔐 ¡Bienvenido al mini juego promocional!");
+        System.out.println("Adivina el número secreto (entre 1 y 5) en " + intentos + " intentos.");
+        for (int i = 1; i <= intentos; i++) {
+            System.out.print("Intento " + i + " - Tu respuesta: ");
+            int respuesta = Integer.parseInt(scanner.nextLine());
+            if (respuesta == numeroSecreto) {
+                System.out.println("✅ ¡Correcto! Has desbloqueado el código: \u001B[35mPIZZA50\u001B[0m");
+                return true;
+            } else {
+                System.out.println("❌ Incorrecto.");
+            }
+        }
+        System.out.println("El número secreto era: " + numeroSecreto);
+        return false;
+    }
+
+    private void esperar() {
+        try {
+            Thread.sleep(1000);
+            System.out.println("✅ Pago exitoso.");
+        } catch (InterruptedException e) {
+            System.out.println("⚠️ Error en el sistema de pagos.");
+        }
     }
 }

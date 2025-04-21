@@ -29,9 +29,9 @@ public class OrderManager {
 
     public void pagar(Pedido pedido) {
         if (payment.procesarPago(pedido)) {
-            db.registrarPago(pedido);
+            db.registrarPago(pedido);      
             db.eliminarPedido(pedido.getId());
-            System.out.println("✅ Pago exitoso y pedido archivado.");
+            System.out.println("✅ Pago exitoso.");
         } else {
             System.out.println("❌ Error al procesar el pago.");
         }

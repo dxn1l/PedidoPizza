@@ -73,11 +73,11 @@ public class MenuPizza {
         double total = totalActual;
 
         while (true) {
-            System.out.println("\n🛠 ¿Qué deseas hacer con el Pedido #" + id + "?");
+            System.out.println("\n🛠 ¿Qué deseas hacer con el Pedido de " + cliente + " con ID: " + id + "?");
             System.out.println("1. Añadir pizza");
             System.out.println("2. Eliminar pizza");
             System.out.println("3. Finalizar edición");
-            System.out.println("Actual: " + items + " | Total: $" + total);
+            System.out.println("4. Ver estado actual del pedido");
             System.out.print("Opción: ");
             int opcion = Integer.parseInt(scanner.nextLine());
 
@@ -119,6 +119,23 @@ public class MenuPizza {
                 case 3 -> {
                     String nuevoItems = String.join(", ", items);
                     return new Pedido(id, cliente, nuevoItems, total);
+                }
+                case 4 -> {
+                    System.out.println("📋 Estado actual del pedido:");
+                    Map<String, Integer> contador = new LinkedHashMap<>();
+                    for (String item : items) {
+                        String nombre = item.split(" \\(\\$")[0];
+                        contador.put(nombre, contador.getOrDefault(nombre, 0) + 1);
+                    }
+
+                    for (Map.Entry<String, Integer> entry : contador.entrySet()) {
+                        String nombre = entry.getKey();
+                        int cantidad = entry.getValue();
+                        String multiplicador = (cantidad > 1) ? " \u001B[33m(x" + cantidad + ")\u001B[0m" : "";
+                        System.out.println("   🍕 " + nombre + multiplicador);
+                    }
+
+                    System.out.printf("💰 Total actual: \u001B[32m$%.2f\u001B[0m%n", total);
                 }
                 default -> System.out.println("❌ Opción no válida.");
             }

@@ -5,6 +5,8 @@ import app.validacion;
 
 import java.io.InputStream;
 import java.sql.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Properties;
 
 public class DataBaseManager {
@@ -61,8 +63,26 @@ public class DataBaseManager {
             stmt.setInt(1, id);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                System.out.println("Pedido #" + rs.getInt("id") + ": " + rs.getString("cliente") +
-                        ", " + rs.getString("items") + ", Total: " + rs.getDouble("total"));
+                int idPedido = rs.getInt("id");
+                String cliente = rs.getString("cliente");
+                String itemsTexto = rs.getString("items");
+                double total = rs.getDouble("total");
+
+                Map<String, Integer> contador = new LinkedHashMap<>();
+                for (String item : itemsTexto.split(", ")) {
+                    String nombre = item.split(" \\(\\$")[0]; // Solo el nombre, sin precio
+                    contador.put(nombre, contador.getOrDefault(nombre, 0) + 1);
+                }
+
+                System.out.println("🧾 Pedido #" + idPedido + " - Cliente: " + cliente);
+                for (Map.Entry<String, Integer> entry : contador.entrySet()) {
+                    String nombre = entry.getKey();
+                    int cantidad = entry.getValue();
+                    String multiplicador = (cantidad > 1) ? " \u001B[33m(x" + cantidad + ")\u001B[0m" : ""; // amarillo
+                    System.out.println("   🍕 " + nombre + multiplicador);
+                }
+                System.out.printf("💰 Total: \u001B[32m$%.2f\u001B[0m%n", total); // total en verde
+
             } else {
                 System.out.println("⚠️ Pedido no encontrado.");
             }
@@ -115,9 +135,20 @@ public class DataBaseManager {
         )
         """;
 
+        String sqlPagados = """
+        CREATE TABLE IF NOT EXISTS pedidos_pagados (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            cliente VARCHAR(100) NOT NULL,
+            items TEXT NOT NULL,
+            total DOUBLE NOT NULL,
+            fecha_pago TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+        """;
+
         try (Connection conn = getConnection(); Statement stmt = conn.createStatement()) {
             stmt.execute(sql);
-            System.out.println("✅ Base de datos inicializada (tabla 'pedidos')");
+            stmt.execute(sqlPagados);
+            System.out.println("✅ Tablas de pedidos incializadas.");
         } catch (SQLException e) {
             System.out.println("❌ Error al inicializar la base de datos:");
             e.printStackTrace();
@@ -141,6 +172,20 @@ public class DataBaseManager {
         } catch (SQLException e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+    public void registrarPago(Pedido pedido) {
+        String sql = "INSERT INTO pedidos_pagados (cliente, items, total) VALUES (?, ?, ?)";
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, pedido.getCliente());
+            stmt.setString(2, pedido.getItems());
+            stmt.setDouble(3, pedido.getTotal());
+            stmt.executeUpdate();
+            System.out.println("🧾 Pedido archivado en 'pedidos_pagados'.");
+        } catch (SQLException e) {
+            System.out.println("❌ Error al registrar el pago:");
+            e.printStackTrace();
         }
     }
 
