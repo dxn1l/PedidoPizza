@@ -1,0 +1,39 @@
+@startuml
+
+object dbManager {
+  clase = DataBaseManager
+}
+
+object auth {
+  clase = Authenticator
+}
+
+object payment {
+  clase = PaymentProcessor
+}
+
+object orderMgr {
+  clase = OrderManager
+  dependencias = dbManager, payment
+}
+
+object sistema {
+  clase = Sistema
+  dependencias = auth, orderMgr
+}
+
+object pedido1 {
+  clase = Pedido
+  id = 101
+  cliente = "Juan"
+  items = ["Pizza Hawaiana", "Coca-Cola"]
+  total = 18.50
+}
+
+sistema --> auth : usa
+sistema --> orderMgr : usa
+orderMgr --> dbManager : inyectado
+orderMgr --> payment : inyectado
+orderMgr --> pedido1 : gestiona
+
+@enduml

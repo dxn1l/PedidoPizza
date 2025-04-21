@@ -1,0 +1,51 @@
+@startuml
+
+class DataBaseManager {
+  +crearPedido(pedido: Pedido): void
+  +actualizarPedido(pedido: Pedido): void
+  +eliminarPedido(id: int): void
+  +obtenerPedido(id: int): Pedido
+}
+
+class Authenticator {
+  +autenticar(usuario: String, clave: String): boolean
+}
+
+class PaymentProcessor {
+  +procesarPago(pedido: Pedido): boolean
+}
+
+class OrderManager {
+  -dbManager: DataBaseManager
+  -paymentProcessor: PaymentProcessor
+
+  +OrderManager(dbManager: DataBaseManager, paymentProcessor: PaymentProcessor)
+  +crearPedido(pedido: Pedido): void
+  +cancelarPedido(id: int): void
+  +procesarPago(pedido: Pedido): boolean
+}
+
+class Pedido {
+  -id: int
+  -cliente: String
+  -items: List<String>
+  -total: double
+}
+
+class Sistema {
+  -authenticator: Authenticator
+  -orderManager: OrderManager
+
+  +Sistema(authenticator: Authenticator, orderManager: OrderManager)
+  +iniciar(): void
+}
+
+Sistema --> Authenticator
+Sistema --> OrderManager
+OrderManager --> DataBaseManager
+OrderManager --> PaymentProcessor
+OrderManager --> Pedido
+DataBaseManager --> Pedido
+PaymentProcessor --> Pedido
+
+@enduml

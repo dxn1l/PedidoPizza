@@ -1,0 +1,22 @@
+@startuml
+start
+
+:Iniciar sesión del usuario;
+:Autenticar credenciales;
+if (Autenticación válida?) then (sí)
+  :Mostrar menú de pizzas;
+  :Seleccionar pizza y detalles del pedido;
+  :Crear pedido;
+  :Procesar pago;
+  if (Pago exitoso?) then (sí)
+    :Guardar pedido en base de datos;
+    :Mostrar confirmación al usuario;
+  else (no)
+    :Mostrar error de pago;
+  endif
+else (no)
+  :Mostrar error de autenticación;
+endif
+
+stop
+@enduml
