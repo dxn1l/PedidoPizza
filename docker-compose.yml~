@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:latest
+    container_name: pizzeria-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: pizzeria
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
+    ports:
+      - "3312:3312"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - mysql_pizaaNet
+
+volumes:
+  mysql_data:
+
+networks:
+  mysql_pizaaNet:
+    driver: bridge
+
+
